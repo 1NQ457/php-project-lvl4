@@ -31,4 +31,4 @@ lint:
 	composer run-script phpcs -- --standard=PSR2 app/Http/Controllers tests/
 
 deploy:
-	git push heroku master
+	git push heroku main:master
