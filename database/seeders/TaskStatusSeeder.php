@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
+use App\Models\TaskStatus;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 
 class TaskStatusSeeder extends Seeder
 {
@@ -15,18 +16,14 @@ class TaskStatusSeeder extends Seeder
      */
     public function run()
     {
-        $user = User::factory()->create();
-        $user->save();
-
-        $statuses = [
-            'новый',
-            'в работе',
-            'на тестировании',
-            'завершен',
-        ];
-        foreach ($statuses as $statusValue) {
-            $status = $user->taskStatuses()->make(['name' => $statusValue]);
-            $status->save();
-        }
+        TaskStatus::factory()
+            ->count(4)
+            ->state(new Sequence(
+                ['name' => 'новый'],
+                ['name' => 'в работе'],
+                ['name' => 'на тестировании'],
+                ['name' => 'завершен']
+            ))
+            ->create();
     }
 }

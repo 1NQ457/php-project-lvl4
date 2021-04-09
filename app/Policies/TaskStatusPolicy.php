@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Support\Facades\Auth;
 
 class TaskStatusPolicy
 {
@@ -17,9 +16,9 @@ class TaskStatusPolicy
      * @param  \App\Models\User  $user
      * @return mixed
      */
-    public function viewAny(User $user)
+    public function viewAny(?User $user)
     {
-        //
+        return true;
     }
 
     /**
@@ -31,7 +30,7 @@ class TaskStatusPolicy
      */
     public function view(User $user, TaskStatus $taskStatus)
     {
-        //
+        return true;
     }
 
     /**
@@ -40,9 +39,9 @@ class TaskStatusPolicy
      * @param  \App\Models\User  $user
      * @return mixed
      */
-    public function create(User $user)
+    public function create(?User $user)
     {
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -54,7 +53,7 @@ class TaskStatusPolicy
      */
     public function update(User $user, TaskStatus $taskStatus)
     {
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -66,6 +65,6 @@ class TaskStatusPolicy
      */
     public function delete(User $user, TaskStatus $taskStatus)
     {
-        return Auth::check();
+        return true;
     }
 }

@@ -2,32 +2,26 @@
 
 namespace Tests\Feature;
 
-use App\Models\TaskStatus;
-use App\Models\User;
-use Faker\Factory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Illuminate\Foundation\Testing\WithFaker;
-use Database\Seeders\TaskStatusSeeder;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\TaskStatus;
+use TaskStatusSeeder;
+use UserSeeder;
 
 class TaskStatusControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
-    //use WithoutMiddleware;
-    use RefreshDatabase;
+    private User $user;
+    private TaskStatus $taskStatus;
+    private string $newTaskStatusName;
 
-    public $user;
-
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->seed(TaskStatusSeeder::class);
-        $this->user = User::first();
+        $this->seed(UserSeeder::class);
+        $this->user = User::find(1);
+        $this->taskStatus = TaskStatus::find(1);
+        $this->newTaskStatusName = 'test';
     }
 
     public function testIndex()
@@ -36,68 +30,58 @@ class TaskStatusControllerTest extends TestCase
         $response->assertOk();
     }
 
+
     public function testCreate()
     {
-        $response = $this->get(route('task_statuses.create'));
-        $response->assertForbidden();
-        // with authentication
-        $response = $this->actingAs($this->user)->get(route('task_statuses.create'));
-        $response->assertOk();
-    }
-
-    public function testEdit()
-    {
-        $response = $this->get(route('task_statuses.edit', TaskStatus::first()->id));
-        $response->assertForbidden();
-        // with authentication
-        $response = $this->actingAs($this->user)->get(route('task_statuses.edit', TaskStatus::first()->id));
+        $response = $this->actingAs($this->user)
+            ->get(route('task_statuses.create'));
         $response->assertOk();
     }
 
     public function testStore()
     {
         $this->withoutMiddleware();
-        $data = ["name" => "test"];
-        $response = $this->post(route('task_statuses.store'), $data);
+        $response = $this->actingAs($this->user)
+        ->post(route('task_statuses.store'), ['name' => $this->newTaskStatusName]);
         $response->assertSessionHasNoErrors();
-        $response->assertForbidden();
-        $this->assertDatabaseMissing('task_statuses', $data);
-        // with authentication
-        $response = $this->actingAs($this->user)->post(route('task_statuses.store'), $data);
-        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('task_statuses', $this->taskStatus->only(['name']));
         $response->assertRedirect();
-        $this->assertDatabaseHas('task_statuses', $data);
+    }
+
+    public function testEdit()
+    {
+        $response = $this->actingAs($this->user)
+            ->get(route('task_statuses.edit', $this->taskStatus));
+        $response->assertOk();
     }
 
     public function testUpdate()
     {
         $this->withoutMiddleware();
-        $status = TaskStatus::first();
-        $data = ['name' => 'test'];
-        $response = $this->patch(route('task_statuses.update', $status->id), $data);
-        $response->assertSessionHasNoErrors();
-        $response->assertStatus(419);
-        $this->assertDatabaseMissing('task_statuses', $data);
-        // with authentication
-        $response = $this->actingAs($this->user)->patch(route('task_statuses.update', $status), $data);
+        dump($this->taskStatus->name);
+        dump($this->newTaskStatusName);
+        $response = $this->actingAs($this->user)
+            ->patch(route('task_statuses.update', $this->taskStatus), [
+                'name' => $this->newTaskStatusName,
+            ]);
+        dump($this->taskStatus->name);
+        dump($this->newTaskStatusName);
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        $this->assertDatabaseHas('task_statuses', $data);
+        //$this->assertDatabaseMissing('task_statuses', ['name' => $this->taskStatus->name]);
+        //$this->assertDatabaseHas('task_statuses', [
+        //    'name' => $this->newTaskStatusName,
+        //]);
     }
 
     public function testDestroy()
     {
         $this->withoutMiddleware();
-        $status = TaskStatus::first();
-        $data = ["name" => $status->name, 'id' => $status->id];
-        $response = $this->delete(route('task_statuses.destroy', $status->id));
-        $response->assertSessionHasNoErrors();
-        $response->assertStatus(419);
-        $this->assertDatabaseHas('task_statuses', $data);
-        // with authentication
-        $response = $this->actingAs($this->user)->delete(route('task_statuses.destroy', $status->id));
+        $response = $this->actingAs($this->user)
+            ->delete(route('task_statuses.destroy', $this->taskStatus));
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        //$this->assertDatabaseMissing('task_statuses', $status->toArray());
+        $response->dump();
+        //$this->assertDatabaseMissing('task_statuses', $this->taskStatus->only(['id']));
     }
 }

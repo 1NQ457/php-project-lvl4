@@ -4,117 +4,66 @@ namespace App\Http\Controllers;
 
 use App\Models\TaskStatus;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TaskStatusRequest;
 
 class TaskStatusController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct()
+    {
+        $this->authorizeResource(TaskStatus::class, 'task_status');
+    }
+
     public function index()
     {
         $taskStatuses = TaskStatus::all();
         return view('task_status.index', compact('taskStatuses'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        $this->authorize('create', TaskStatus::class);
         $taskStatus = new TaskStatus();
         return view('task_status.create', compact('taskStatus'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        $this->authorize('create', TaskStatus::class);
-        $user = auth()->user();
-        $status = $user->taskStatuses()->make($request->all());
-        $status->save();
-        flash(__('interface.task_statuses.created'))->success();
+        $request->validate([
+            'name' => 'required|string|unique:task_statuses',
+        ]);
+
+        TaskStatus::create($request->all());
+        flash(__('messages.flash.success.added', ['subject' => __('taskStatus.subject')]))->success();
         return redirect()->route('task_statuses.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\TaskStatus  $taskStatus
-     * @return \Illuminate\Http\Response
-     */
-    public function show(TaskStatus $taskStatus)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\TaskStatus  $taskStatus
-     * @return \Illuminate\Http\Response
-     */
     public function edit(TaskStatus $taskStatus)
     {
-        $this->authorize('update', $taskStatus);
         return view('task_status.edit', compact('taskStatus'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\TaskStatus  $taskStatus
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, TaskStatus $taskStatus)
     {
-        $user = auth()->user();
-        if (!$user) {
-            abort(419);
-        }
-        if ($request->user()->cannot('update', $taskStatus)) {
-            abort(403);
-        }
-        $taskStatus->creator()->associate($user);
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('task_statuses')->ignore($taskStatus)
+            ]
+        ]);
+
         $taskStatus->fill($request->all());
         $taskStatus->save();
-
-        flash(__('interface.task_statuses.updated'))->success();
+        flash(__('messages.flash.success.changed', ['subject' => __('taskStatus.subject')]))->success();
         return redirect()->route('task_statuses.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\TaskStatus  $taskStatus
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(TaskStatus $taskStatus)
     {
-        /* @phpstan-ignore-next-line */
-        $user = auth()->user();
-        if (!$user) {
-            abort(419);
-        }
-
-        if ($taskStatus->exists()) {
-            $taskStatus->delete();
-        }
-
-        flash(__('interface.task_statuses.destroyed'))->success();
+        $taskStatus->delete();
+        flash(__('messages.flash.success.deleted', ['subject' => __('taskStatus.subject')]))->success();
         return redirect()->route('task_statuses.index');
     }
 }
