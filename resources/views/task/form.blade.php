@@ -23,3 +23,7 @@
     {{ Form::label('assigned_to_id', __('interface.performer')) }}
     {{ Form::select('assigned_to_id', $users, null, ['class' => 'form-control', 'placeholder' => '---------']) }}
 </div>
+<div class="form-group">
+    {{ Form::label('labels', __('interface.labels.name')) }}
+    {{ Form::select('labels[]', $labels, null, ['class' => 'form-control', 'placeholder' => ' ', 'multiple' => true]) }}
+</div>

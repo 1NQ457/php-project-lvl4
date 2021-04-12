@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
+use App\Models\Label;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class TaskController extends Controller
 {
@@ -18,10 +21,19 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
-        $taskStatuses = TaskStatus::all();
-        $users = User::all();
-        return view('task.index', compact('tasks', 'users', 'taskStatuses'));
+        $tasks = QueryBuilder::for(Task::class)
+            ->allowedFilters(
+                [
+                    AllowedFilter::exact('status_id'),
+                    AllowedFilter::exact('created_by_id'),
+                    AllowedFilter::exact('assigned_to_id')
+                ]
+            )
+            ->get();
+        session()->put('filter', \request()->input('filter'));
+        $taskStatuses = TaskStatus::pluck('name', 'id');
+        $users = User::pluck('name', 'id');
+        return view('task.index', compact('tasks', 'taskStatuses', 'users'));
     }
 
     /**
@@ -34,7 +46,8 @@ class TaskController extends Controller
         $task = new Task();
         $taskStatuses = TaskStatus::pluck('name', 'id');
         $users = User::pluck('name', 'id');
-        return view('task.create', compact('task', 'users', 'taskStatuses'));
+        $labels = Label::pluck('name', 'id');
+        return view('task.create', compact('task', 'users', 'taskStatuses', 'labels'));
     }
 
     /**
@@ -49,12 +62,14 @@ class TaskController extends Controller
             'name' => "required|string|unique:tasks",
             'description' => 'nullable|string|required',
             'assigned_to_id' => 'nullable|exists:users,id',
-            'status_id' => 'required|exists:task_statuses,id'
+            'status_id' => 'required|exists:task_statuses,id',
+            'labels.*' => 'exists:labels,id'
         ]);
         $task = new Task();
         $task->creator()->associate(Auth::user());
         $task->fill($request->all());
         $task->save();
+        $task->labels()->sync($request->input('labels'));
         flash(__('interface.tasks.created'))->success();
         return redirect()->route('tasks.index');
     }
@@ -68,7 +83,8 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $statusName = $task->status->name;
-        return view('task.show', compact('task', 'statusName'));
+        $labels = $task->labels()->orderBy('name')->get();
+        return view('task.show', compact('task', 'statusName', 'labels'));
     }
 
     /**
@@ -81,7 +97,8 @@ class TaskController extends Controller
     {
         $taskStatuses = TaskStatus::pluck('name', 'id');
         $users = User::pluck('name', 'id');
-        return view('task.edit', compact('task', 'taskStatuses', 'users'));
+        $labels = Label::pluck('name', 'id');
+        return view('task.edit', compact('task', 'taskStatuses', 'users', 'labels'));
     }
 
     /**
@@ -102,9 +119,11 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'status_id' => 'required|exists:task_statuses,id',
             'assigned_to_id' => 'nullable|exists:users,id',
+            'labels.*' => 'exists:labels,id'
         ]);
         $task->fill($request->all());
         $task->save();
+        $task->labels()->sync($request->input('labels'));
         flash(__('interface.tasks.updated'))->success();
         return redirect()->route('tasks.index');
     }
@@ -117,6 +136,7 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        $task->labels()->detach();
         $task->delete();
         flash(__('interface.tasks.destroyed'))->success();
         return redirect()->route('tasks.index');

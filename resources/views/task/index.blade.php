@@ -2,9 +2,19 @@
 
 @section('content')
     <h1 class="mb-5">{{ __('interface.tasks.name') }}</h1>
+    <div class="d-flex">
+    <div>
+        {{ Form::open(['url' => route('tasks.index'), 'method' => 'GET', 'class' => 'form-inline']) }}
+            {{ Form::select('filter[status_id]', $taskStatuses, session('filter')['status_id'] ?? null, ['class' => 'form-control mr-2', 'placeholder' => __('interface.status')]) }}
+            {{ Form::select('filter[created_by_id]', $users, session('filter')['created_by_id'] ?? null, ['class' => 'form-control mr-2', 'placeholder' => __('interface.creator')]) }}
+            {{ Form::select('filter[assigned_to_id]', $users, session('filter')['assigned_to_id'] ?? null, ['class' => 'form-control mr-2', 'placeholder' => __('interface.performer')]) }}
+            {{ Form::submit(__('interface.apply'), ['class' => 'btn btn-outline-primary']) }}
+        {{ Form::close() }}
+    </div>
     @auth
-        <a href="{{ route('tasks.create') }}" class="btn btn-primary">{{ __('interface.tasks.create') }}</a>
+        <a href="{{ route('tasks.create') }}" class="btn btn-primary ml-auto">{{ __('interface.tasks.create') }}</a>
     @endauth
+</div>
     <table class="table mt-2">
         <thead>
             <tr>

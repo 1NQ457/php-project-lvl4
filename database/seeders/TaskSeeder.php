@@ -17,10 +17,14 @@ class TaskSeeder extends Seeder
      */
     public function run()
     {
+        $labels = Label::all();
         $data = TaskStatus::all()->map(function ($item) {
             return ['status_id' => $item->id];
         })->all();
 
-        Task::factory()->count(5)->state(new Sequence(...$data))->create();
+        Task::factory()->count(5)->state(new Sequence(...$data))->create()
+            ->each(function (Task $task) use ($labels): void {
+                $task->labels()->attach($labels->random(rand(1, 5)));
+            });
     }
 }

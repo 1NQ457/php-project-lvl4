@@ -41,7 +41,7 @@
                             <a class="nav-link" href="{{ route('task_statuses.index') }}">{{ __('interface.task_statuses.name') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">{{ __('interface.labels.name') }}</a>
+                            <a class="nav-link" href="{{ route('labels.index') }}">{{ __('interface.labels.name') }}</a>
                         </li>
                     </ul>
 
