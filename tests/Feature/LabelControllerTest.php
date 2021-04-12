@@ -7,8 +7,8 @@ use App\Models\User;
 use App\Models\Label;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-use LabelSeeder;
-use UserSeeder;
+use Database\Seeders\LabelSeeder;
+use Database\Seeders\UserSeeder;
 
 class LabelControllerTest extends TestCase
 {
@@ -23,26 +23,26 @@ class LabelControllerTest extends TestCase
         parent::setUp();
         $this->seed(LabelSeeder::class);
         $this->seed(UserSeeder::class);
-        $this->label = Label::find(1);
-        $this->user = User::find(1);
+        $this->label = Label::findOrFail(1);
+        $this->user = User::findOrFail(1);
         $this->newlabelAttributes = Label::factory()->make()->only(['name', 'description']);
     }
 
-    public function testIndex()
+    public function testIndex(): void
     {
         $response = $this->actingAs($this->user)
             ->get(route('labels.index'));
         $response->assertOk();
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $response = $this->actingAs($this->user)
             ->get(route('labels.create'));
         $response->assertOk();
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->user)
@@ -52,14 +52,14 @@ class LabelControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function testEdit()
+    public function testEdit(): void
     {
         $response = $this->actingAs($this->user)
             ->get(route('labels.edit', $this->label));
         $response->assertOk();
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->user)
@@ -73,7 +73,7 @@ class LabelControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function testDestroy()
+    public function testDestroy(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->user)

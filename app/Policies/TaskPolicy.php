@@ -65,30 +65,6 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task)
     {
-        return $task->creator->is($user);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Task  $task
-     * @return mixed
-     */
-    public function restore(User $user, Task $task)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Task  $task
-     * @return mixed
-     */
-    public function forceDelete(User $user, Task $task)
-    {
-        //
+        return optional($task->creator)->is($user);
     }
 }

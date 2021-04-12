@@ -22,28 +22,28 @@ class TaskControllerTest extends TestCase
     {
         parent::setUp();
         $this->seed();
-        $this->task = Task::find(1);
-        $this->taskCreator = $this->task->creator;
-        $this->taskStatus = TaskStatus::find(1);
+        $this->task = Task::findOrFail(1);
+        $this->taskCreator = optional($this->task)->creator;
+        $this->taskStatus = TaskStatus::findOrFail(1);
         $this->newTaskAttributes = Task::factory()->make([
-            'status_id' => $this->taskStatus->id,
+            'status_id' => optional($this->taskStatus)->id,
         ])->only(['name', 'description', 'status_id']);
     }
 
-    public function testIndex()
+    public function testIndex(): void
     {
         $response = $this->get(route('tasks.index'));
         $response->assertOk();
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $response = $this->actingAs($this->taskCreator)
             ->get(route('tasks.create'));
         $response->assertOk();
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->taskCreator)->post(
@@ -55,21 +55,21 @@ class TaskControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function testShow()
+    public function testShow(): void
     {
         $response = $this->actingAs($this->taskCreator)
             ->get(route('tasks.show', $this->task));
         $response->assertOk();
     }
 
-    public function testEdit()
+    public function testEdit(): void
     {
         $response = $this->actingAs($this->taskCreator)
             ->get(route('tasks.edit', $this->task));
         $response->assertOk();
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->taskCreator)
@@ -83,7 +83,7 @@ class TaskControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function testDestroy()
+    public function testDestroy(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $response = $this->actingAs($this->taskCreator)

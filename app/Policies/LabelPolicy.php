@@ -67,28 +67,4 @@ class LabelPolicy
     {
         return true;
     }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Label  $label
-     * @return mixed
-     */
-    public function restore(User $user, Label $label)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Label  $label
-     * @return mixed
-     */
-    public function forceDelete(User $user, Label $label)
-    {
-        //
-    }
 }

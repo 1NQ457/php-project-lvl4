@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\TaskStatus;
-use TaskStatusSeeder;
-use UserSeeder;
+use Database\Seeders\TaskStatusSeeder;
+use Database\Seeders\UserSeeder;
 
 class TaskStatusControllerTest extends TestCase
 {
@@ -19,26 +19,26 @@ class TaskStatusControllerTest extends TestCase
         parent::setUp();
         $this->seed(TaskStatusSeeder::class);
         $this->seed(UserSeeder::class);
-        $this->user = User::find(1);
-        $this->taskStatus = TaskStatus::find(1);
+        $this->user = User::findOrFail(1);
+        $this->taskStatus = TaskStatus::findOrFail(1);
         $this->newTaskStatusName = 'test';
     }
 
-    public function testIndex()
+    public function testIndex(): void
     {
         $response = $this->get(route('task_statuses.index'));
         $response->assertOk();
     }
 
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $response = $this->actingAs($this->user)
             ->get(route('task_statuses.create'));
         $response->assertOk();
     }
 
-    public function testStore()
+    public function testStore(): void
     {
         $this->withoutMiddleware();
         $response = $this->actingAs($this->user)
@@ -48,14 +48,14 @@ class TaskStatusControllerTest extends TestCase
         $response->assertRedirect();
     }
 
-    public function testEdit()
+    public function testEdit(): void
     {
         $response = $this->actingAs($this->user)
             ->get(route('task_statuses.edit', $this->taskStatus));
         $response->assertOk();
     }
 
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $this->withoutMiddleware();
         $taskStatus = TaskStatus::find(1);
@@ -73,7 +73,7 @@ class TaskStatusControllerTest extends TestCase
         ]);
     }
 
-    public function testDestroy()
+    public function testDestroy(): void
     {
         $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
         $taskStatus = TaskStatus::find(2);
@@ -81,6 +81,6 @@ class TaskStatusControllerTest extends TestCase
             ->delete(route('task_statuses.destroy', $taskStatus));
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        $this->assertDatabaseMissing('task_statuses', $taskStatus->only(['id']));
+        $this->assertDatabaseMissing('task_statuses', ['id' => $taskStatus->id]);
     }
 }
