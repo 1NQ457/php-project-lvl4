@@ -41,8 +41,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function taskStatuses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function tasksCreated(): HasMany
     {
-        return $this->hasMany(TaskStatus::class, 'creator_id');
+        return $this->hasMany(Task::class, 'created_by_id');
+    }
+
+    public function tasksAssigned(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to_id');
     }
 }

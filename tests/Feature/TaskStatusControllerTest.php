@@ -58,30 +58,29 @@ class TaskStatusControllerTest extends TestCase
     public function testUpdate()
     {
         $this->withoutMiddleware();
-        dump($this->taskStatus->name);
-        dump($this->newTaskStatusName);
+        $taskStatus = TaskStatus::find(1);
+        $oldName = "Новый";
+        $testName = "test name";
         $response = $this->actingAs($this->user)
-            ->patch(route('task_statuses.update', $this->taskStatus), [
-                'name' => $this->newTaskStatusName,
+            ->patch(route('task_statuses.update', $taskStatus), [
+                'name' => $testName,
             ]);
-        dump($this->taskStatus->name);
-        dump($this->newTaskStatusName);
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        //$this->assertDatabaseMissing('task_statuses', ['name' => $this->taskStatus->name]);
-        //$this->assertDatabaseHas('task_statuses', [
-        //    'name' => $this->newTaskStatusName,
-        //]);
+        $this->assertDatabaseMissing('task_statuses', ['name' => $oldName]);
+        $this->assertDatabaseHas('task_statuses', [
+            'name' => $testName,
+        ]);
     }
 
     public function testDestroy()
     {
-        $this->withoutMiddleware();
+        $this->withoutMiddleware('App\Http\Middleware\VerifyCsrfToken');
+        $taskStatus = TaskStatus::find(2);
         $response = $this->actingAs($this->user)
-            ->delete(route('task_statuses.destroy', $this->taskStatus));
+            ->delete(route('task_statuses.destroy', $taskStatus));
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
-        $response->dump();
-        //$this->assertDatabaseMissing('task_statuses', $this->taskStatus->only(['id']));
+        $this->assertDatabaseMissing('task_statuses', $taskStatus->only(['id']));
     }
 }
