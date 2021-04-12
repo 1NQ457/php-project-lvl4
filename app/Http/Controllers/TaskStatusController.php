@@ -58,7 +58,7 @@ class TaskStatusController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Task  $task
+     * @param  \App\Models\TaskStatus  $taskStatus
      * @return \Illuminate\View\View
      */
     public function edit(TaskStatus $taskStatus)
@@ -70,7 +70,7 @@ class TaskStatusController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Task  $task
+     * @param  \App\Models\TaskStatus  $taskStatus
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, TaskStatus $taskStatus)
@@ -92,7 +92,7 @@ class TaskStatusController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Task  $task
+     * @param  \App\Models\TaskStatus  $taskStatus
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(TaskStatus $taskStatus)
